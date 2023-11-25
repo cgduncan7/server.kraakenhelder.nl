@@ -1,0 +1,37 @@
+name: Push to master
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build-server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Decode GCP credentials
+        run: mkdir private && echo "${{ secrets.GCP_CREDENTIALS }}" | base64 -d > private/credentials.json
+      - name: Test credentials
+        run: cat private/credentials.json | jq .client_id
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+      - name: Install node modules
+        run: npm i
+      - name: Build app
+        run: npm run build
+      - name: Deploy app
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "dist/bundle.js"
+          target: /srv/server-kraakenhelder-nl/index.js
+      - name: Restart server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: rc-service server-kraakenhelder-nl restart
