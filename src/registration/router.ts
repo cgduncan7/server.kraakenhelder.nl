@@ -9,16 +9,16 @@ router.post('/', async (req, res) => {
   const { name, email, phoneNumber } = req.body
 
   if (!name || !email) {
-    res.status(400).send('Bad request')
+    res.sendStatus(400)
     return
   }
 
   try {
     await registerPerson({ name, email, phoneNumber })
-    res.status(200).send('Registered')
+    res.sendStatus(200)
   } catch (err: any) {
     console.error(err.message)
-    res.status(500).send('Internal server error')
+    res.sendStatus(500)
   }
 })
 
