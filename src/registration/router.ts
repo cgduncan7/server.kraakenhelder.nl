@@ -3,11 +3,14 @@ import { registerPerson } from './controller'
 
 const router = Router()
 
+router.get('/', (_, res) => res.sendStatus(200))
+
 router.post('/', async (req, res) => {
   const { name, email, phoneNumber } = req.body
 
   if (!name || !email) {
     res.status(400).send('Bad request')
+    return
   }
 
   try {
